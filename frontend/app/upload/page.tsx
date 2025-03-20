@@ -1,23 +1,15 @@
 'use client';
 
-'use client';
-
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import Link from 'next/link';
-import { 
-  FiArrowLeft, 
-  FiCamera, 
-  FiUpload, 
-  FiActivity, 
-  FiBarChart2, 
-  FiGlobe, 
-  FiArrowRight, 
-  FiLogIn, 
-  FiUserPlus 
+import Image from 'next/image';
+import {
+  FiArrowLeft,
+  FiCamera,
+  FiUpload,
 } from 'react-icons/fi';
 import { FaLeaf } from 'react-icons/fa';
-
 
 export default function Upload() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -33,10 +25,9 @@ export default function Upload() {
 
   const accept: { [mime: string]: string[] } = { 'image/*': [] };
   const { getRootProps, getInputProps } = useDropzone({
-  onDrop,
-  accept,
-});
-
+    onDrop,
+    accept,
+  });
 
   // Handle camera capture
   const handleCameraCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -133,11 +124,15 @@ export default function Upload() {
           {preview && (
             <div className="mb-8 transition-opacity duration-500 ease-in-out">
               <h3 className="text-xl font-medium mb-2 text-green-900">Preview:</h3>
-              <img
-                src={preview}
-                alt="Uploaded Preview"
-                className="w-full rounded-lg border border-green-300 shadow-sm transition-all duration-300"
-              />
+              <div className="w-full relative h-64 border border-green-300 rounded-lg shadow-sm transition-all duration-300">
+                <Image 
+                  src={preview} 
+                  alt="Uploaded Preview" 
+                  fill 
+                  sizes="(max-width: 768px) 100vw, 800px"
+                  className="object-cover rounded-lg"
+                />
+              </div>
             </div>
           )}
 
@@ -190,7 +185,7 @@ export default function Upload() {
         .animate-spin-slow {
           animation: spin-slow 4s linear infinite;
         }
-        /* Animated background gradient using royal green accents */
+        /* Animated background gradient with subtle royal green accents */
         .bg-animated-gradient {
           background: linear-gradient(270deg, #F0FDF4, #F0FDF4, #F0FDF4);
           background-size: 600% 600%;
