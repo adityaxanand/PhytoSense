@@ -70,8 +70,8 @@ export default function Upload() {
           <FiArrowLeft className="mr-1" /> Back to Home
         </Link>
 
-        {/* Main Card */}
-        <div className="bg-white rounded-lg shadow-xl p-10 max-w-3xl w-full transition-transform duration-500 ease-in-out hover:scale-105">
+        {/* Main Card - hover scaling only on md and above */}
+        <div className="bg-white rounded-lg shadow-xl p-10 max-w-3xl w-full transition-transform duration-500 ease-in-out md:hover:scale-105">
           {/* Header with Plant Icon and Tagline */}
           <div className="flex flex-col items-center mb-6">
             <FaLeaf className="text-green-800 animate-pulse" size={52} />
