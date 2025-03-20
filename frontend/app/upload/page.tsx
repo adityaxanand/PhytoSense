@@ -19,8 +19,9 @@ export default function Upload() {
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
-    accept: 'image/*',
+    accept: { 'image/*': [] },
   });
+  
 
   // Handle camera capture
   const handleCameraCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
