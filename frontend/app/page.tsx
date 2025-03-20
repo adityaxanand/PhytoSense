@@ -3,18 +3,23 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
-  FiArrowRight,
-  FiLogIn,
-  FiUserPlus,
+  FiArrowLeft,
+  FiCamera,
   FiUpload,
   FiActivity,
   FiBarChart2,
   FiGlobe,
+  FiArrowRight,
+  FiLogIn,
+  FiUserPlus,
+  FiMenu,
+  FiX,
 } from 'react-icons/fi';
 import { FaLeaf } from 'react-icons/fa';
 
 export default function Home() {
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Update scroll progress meter based on scroll position
   useEffect(() => {
@@ -30,7 +35,7 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Markers for timeline
+  // Markers for timeline (desktop only)
   const markers = [
     { threshold: 10, label: 'Upload', icon: <FiUpload size={18} /> },
     { threshold: 40, label: 'Detect', icon: <FiActivity size={18} /> },
@@ -40,9 +45,9 @@ export default function Home() {
 
   return (
     <>
-      <div className="relative bg-green-50 text-slate-800">
-        {/* Vertical Timeline Meter */}
-        <div className="fixed left-4 top-1/2 transform -translate-y-1/2 z-50">
+      <div className="relative bg-green-50 text-slate-800 min-h-screen">
+        {/* Vertical Timeline Meter (hidden on mobile) */}
+        <div className="hidden md:block fixed left-4 top-1/2 transform -translate-y-1/2 z-50">
           <div className="w-2 h-80 bg-gray-200 rounded-full relative overflow-hidden shadow-inner">
             <div
               style={{ height: `${scrollProgress}%` }}
@@ -54,16 +59,16 @@ export default function Home() {
                 <div
                   key={idx}
                   style={{ top: `${(marker.threshold / 100) * 80 - 7}px` }}
-                  className={`absolute left-[-6px] flex items-center gap-1 transform -translate-y-1/2 transition-all duration-300 ${
+                  className={`absolute left-[-6px] flex items-center gap-1 transform -translate-y-1/2 transition-all duration-300 text-xs font-medium ${
                     active ? 'text-green-800' : 'text-gray-400'
                   }`}
                 >
                   <div
-                    className={`w-3 h-3 rounded-full ${
+                    className={`w-2 h-2 rounded-full ${
                       active ? 'bg-green-800' : 'bg-gray-400'
                     }`}
                   ></div>
-                  <span className="text-xs font-medium">{marker.label}</span>
+                  <span>{marker.label}</span>
                   <span>{marker.icon}</span>
                 </div>
               );
@@ -77,27 +82,51 @@ export default function Home() {
             <FaLeaf size={28} className="text-green-800 animate-spin-slow" />
             <span className="text-xl font-bold text-green-800">PhytoSense</span>
           </div>
-          <div className="flex space-x-4">
+          {/* Desktop Nav */}
+          <div className="hidden md:flex space-x-4">
             <Link
               href="/login"
-              className="flex items-center justify-center w-32 h-10
-                         border-2 border-blue-900 text-blue-900 bg-transparent
-                         rounded-lg transition-all duration-300 transform hover:scale-105
-                         hover:bg-blue-900 hover:text-white"
+              className="flex items-center justify-center w-32 h-10 border-2 border-blue-900 text-blue-900 bg-transparent rounded-lg transition-all duration-300 transform hover:scale-105 hover:bg-blue-900 hover:text-white text-base"
             >
               <FiLogIn className="mr-1" /> Login
             </Link>
             <Link
               href="/signup"
-              className="flex items-center justify-center w-32 h-10
-                         border-2 border-blue-900 text-blue-900 bg-transparent
-                         rounded-lg transition-all duration-300 transform hover:scale-105
-                         hover:bg-blue-900 hover:text-white"
+              className="flex items-center justify-center w-32 h-10 border-2 border-blue-900 text-blue-900 bg-transparent rounded-lg transition-all duration-300 transform hover:scale-105 hover:bg-blue-900 hover:text-white text-base"
             >
               <FiUserPlus className="mr-1" /> Signup
             </Link>
           </div>
+          {/* Mobile Nav Toggle */}
+          <div className="md:hidden">
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              {mobileMenuOpen ? (
+                <FiX size={24} className="text-green-800" />
+              ) : (
+                <FiMenu size={24} className="text-green-800" />
+              )}
+            </button>
+          </div>
         </nav>
+        {/* Mobile Nav Popup */}
+        {mobileMenuOpen && (
+          <div className="md:hidden absolute top-20 right-4 bg-white shadow-lg rounded-lg p-4 flex flex-col space-y-2 z-50">
+            <Link
+              href="/login"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-center w-full h-10 border-2 border-blue-900 text-blue-900 bg-transparent rounded-lg transition-all duration-300 hover:bg-blue-900 hover:text-white text-sm"
+            >
+              <FiLogIn className="mr-1" /> Login
+            </Link>
+            <Link
+              href="/signup"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-center w-full h-10 border-2 border-blue-900 text-blue-900 bg-transparent rounded-lg transition-all duration-300 hover:bg-blue-900 hover:text-white text-sm"
+            >
+              <FiUserPlus className="mr-1" /> Signup
+            </Link>
+          </div>
+        )}
 
         {/* Hero Section */}
         <section className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-r from-green-50 to-green-100 px-4 py-12">
