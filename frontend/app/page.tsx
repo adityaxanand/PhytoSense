@@ -36,7 +36,7 @@ export default function Home() {
           <div className="p-6 bg-white rounded shadow">
             <h2 className="text-2xl font-semibold mb-3">Easy Image Upload</h2>
             <p className="text-gray-700">
-              Drag & drop images or capture using your device's camera.
+              Drag &amp; drop images or capture using your device&apos;s camera.
             </p>
           </div>
           <div className="p-6 bg-white rounded shadow">
