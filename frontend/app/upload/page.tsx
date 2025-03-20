@@ -91,6 +91,24 @@ export default function Upload() {
           <p className="mt-2">{result}</p>
         </div>
       )}
+
+      <div className="mb-6">
+        <label
+          htmlFor="cameraInput"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 cursor-pointer"
+        >
+          Open Camera
+        </label>
+        <input
+          id="cameraInput"
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handleCameraCapture}
+          className="hidden"
+        />
+      </div>
     </div>
+    
   );
 }
