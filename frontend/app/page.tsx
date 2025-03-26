@@ -14,6 +14,7 @@ import {
   FiX,
 } from 'react-icons/fi';
 import { FaLeaf } from 'react-icons/fa';
+import AuthStateListener from './context/AuthStateListener';
 
 export default function Home() {
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -43,6 +44,8 @@ export default function Home() {
 
   return (
     <>
+    <AuthStateListener>
+      {/* Add your children components here */}
       <div className="relative bg-green-50 text-slate-800 min-h-screen">
         {/* Vertical Timeline Meter (hidden on mobile) */}
         <div className="hidden md:block fixed left-4 top-1/2 transform -translate-y-1/2 z-50">
@@ -212,6 +215,7 @@ export default function Home() {
           animation: spin-slow 4s linear infinite;
         }
       `}</style>
+      </AuthStateListener>
     </>
   );
 }

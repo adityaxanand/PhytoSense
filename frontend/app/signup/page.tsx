@@ -4,25 +4,48 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { FiUserPlus } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
+import { auth } from '../firebase/firebaseConfig';
+import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { FirebaseError } from 'firebase/app';
 
 export default function Signup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
-    // Implement your signup logic here
-    alert('Signup functionality not implemented yet');
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      alert('Signup successful!');
+      // Redirect or perform additional actions upon successful signup
+    } catch (error) {
+      const err = error as unknown;
+      if (err instanceof Error) {
+        alert(err.message);
+      } else {
+        alert('An unknown error occurred.');
+      }
+    }
   };
 
-  const handleGoogleSignup = () => {
-    // Implement your Google signup logic here
-    alert('Google signup not implemented yet');
+  const handleGoogleSignup = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      alert('Google signup successful!');
+      // Redirect or perform additional actions upon successful signup
+    } catch (error) {
+      if (error instanceof FirebaseError) {
+        alert(error.message);
+      } else {
+        alert('An unknown error occurred.');
+      }
+    }
   };
 
   return (

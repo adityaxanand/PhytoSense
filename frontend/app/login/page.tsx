@@ -1,23 +1,37 @@
+// login/page.tsx
 'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
 import { FiLogIn } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { auth } from '../firebase/firebaseConfig';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Implement your login logic here
-    alert('Login functionality not implemented yet');
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      alert('Login successful');
+      // Redirect or perform additional actions upon successful login
+    } catch (error) {
+      alert('Login failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
   };
 
-  const handleGoogleLogin = () => {
-    // Implement your Google login logic here
-    alert('Google login not implemented yet');
+  const handleGoogleLogin = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      alert('Google login successful');
+      // Redirect or perform additional actions upon successful login
+    } catch (error) {
+      alert('Google login failed: ' + (error as Error).message);
+    }
   };
 
   return (
