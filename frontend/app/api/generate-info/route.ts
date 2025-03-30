@@ -1,6 +1,8 @@
 // app/api/generate-info/route.ts
 import { NextResponse } from 'next/server'
 
+export const maxDuration = 30; // Maximum allowed for Pro plan
+
 export async function POST(request: Request) {
   console.log('API Key exists:', !!process.env.GEMINI_API_KEY); // Debug line
   try {
