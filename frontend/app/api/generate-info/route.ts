@@ -2,8 +2,10 @@
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
+  console.log('API Key exists:', !!process.env.GEMINI_API_KEY); // Debug line
   try {
     const { diagnosis } = await request.json()
+    console.log('Received diagnosis:', diagnosis?.slice(0, 50)); // Debug line
     
     if (!diagnosis) {
       return NextResponse.json({ error: 'Diagnosis text is required' }, { status: 400 })
@@ -48,6 +50,7 @@ export async function POST(request: Request) {
         }]
       })
     })
+    console.log('Gemini response status:', response.status); // Debug line
 
     if (!response.ok) {
       const errorData = await response.json()

@@ -125,10 +125,12 @@ export default function Upload() {
   }
 
   const handleGenerateInfo = async () => {
+    console.log('Starting generation with:', result?.slice(0, 50)); // Debug
     if (!result) {
       alert('No diagnosis results available');
       return;
     }
+    // console.log('API response status:', res.status); // Debug
   
     setLoadingInfo(true);
     setGeneratedInfo(''); // Clear previous content
