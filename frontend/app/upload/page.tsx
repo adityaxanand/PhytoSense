@@ -124,44 +124,44 @@ export default function Upload() {
     }
   }
 
-
-const handleGenerateInfo = async () => {
-  if (!result) {
-    alert('No diagnosis results available')
-    return
-  }
-
-  setLoadingInfo(true)
-  try {
-    const res = await fetch('/api/generate-info', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ diagnosis: result })
-    })
-
-    const data = await res.json()
-    
-    if (!res.ok) {
-      throw new Error(data.error || 'Failed to generate detailed report')
+  const handleGenerateInfo = async () => {
+    if (!result) {
+      alert('No diagnosis results available');
+      return;
     }
-
-    if (!data.info) {
-      throw new Error('Received empty response from the server')
+  
+    setLoadingInfo(true);
+    setGeneratedInfo(''); // Clear previous content
+    try {
+      const res = await fetch('/api/generate-info', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ diagnosis: result })
+      });
+  
+      // First check if response is OK
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to generate report');
+      }
+  
+      // Then try to parse JSON
+      const data = await res.json();
+      
+      if (!data.info) {
+        throw new Error('Empty response from server');
+      }
+  
+      setGeneratedInfo(data.info);
+    } catch (error) {
+      console.error('Generation error:', error);
+      setGeneratedInfo(error instanceof Error ? error.message : 'Failed to generate report');
+    } finally {
+      setLoadingInfo(false);
     }
+  };
 
-    setGeneratedInfo(data.info)
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error('Generation error:', error)
-      setGeneratedInfo(`Error: ${error.message}`)
-    } else {
-      console.error('Unknown error:', error)
-      setGeneratedInfo('Error: Failed to generate detailed information')
-    }
-  } finally {
-    setLoadingInfo(false)
-  }
-}
+// Removed duplicate declaration of handleGenerateInfo
 
 
   return (
@@ -184,9 +184,7 @@ const handleGenerateInfo = async () => {
         <div className="group relative h-96 rounded-2xl border-2 border-dashed border-gray-200 bg-blue-50/50 transition-all hover:border-emerald-500">
         {/* Dropzone Area */}
         <div 
-          {...getRootProps({
-            onClick: (e) => e.stopPropagation() // Prevent parent click propagation
-          })} 
+          {...getRootProps()} 
           className="h-full w-full flex flex-col items-center justify-center gap-6 cursor-pointer"
         >
           <input {...getInputProps()} />

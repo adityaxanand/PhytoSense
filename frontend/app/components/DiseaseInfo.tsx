@@ -29,7 +29,18 @@ const SectionIcon: React.FC<{ title: string }> = ({ title }) => {
   )
 }
 
-const renderMarkdownLine = (line: string, lineIndex: number) => {
+const renderMarkdownLine = (line: string, lineIndex: number, content: string) => {
+  if (!content) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200 text-yellow-700"
+      >
+        No disease information available
+      </motion.div>
+    )
+  }
   if (!line.trim()) return null
 
   // Handle bullet points
@@ -64,7 +75,7 @@ const renderMarkdownText = (text: string) => {
 }
 
 export default function DiseaseInfo({ content }: { content: string }) {
-  if (content.startsWith('Error:')) {
+  if (content.startsWith('Error:') || content.startsWith('Unexpected')) {
     return (
       <motion.div
         initial={{ opacity: 0 }}
@@ -108,7 +119,7 @@ export default function DiseaseInfo({ content }: { content: string }) {
             </div>
             
             <div className="pl-9">
-              {bodyText.split('\n').map((line, i) => renderMarkdownLine(line, i))}
+              {bodyText.split('\n').map((line, i) => renderMarkdownLine(line, i, content))}
             </div>
           </motion.div>
         )
