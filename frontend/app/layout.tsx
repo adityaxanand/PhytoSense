@@ -20,6 +20,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'PhytoSense',
   description: 'Advanced AI-powered plant disease detection',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false
+  }
 };
 
 export default function RootLayout({
@@ -30,7 +36,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head />
-      <body className={`${geistSans.variable} ${geistMono.variable} font-sans bg-green-50 antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} font-sans bg-green-50 antialiased overflow-x-hidden`}>
         <AuthProvider>
         <Navbar />
         <ModelLauncherWrapper />

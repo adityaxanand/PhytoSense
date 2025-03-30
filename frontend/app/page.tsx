@@ -58,9 +58,9 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-emerald-50">
+    <div className="fixed inset-0 min-h-screen bg-gradient-to-b from-white to-emerald-50 -z-20">
       {/* Floating Leaves Background */}
-            <div className="fixed inset-0 pointer-events-none">
+            <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
               {floatingLeaves.map((leaf) => (
                 <motion.div
                   key={leaf.id}

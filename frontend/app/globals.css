@@ -176,6 +176,26 @@ body {
     scale: 0.9; /* Slightly smaller for better mobile interaction */
   }
 }
+
+/* app/globals.css */
+/* Prevent layout shift */
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+  
+  body {
+    @apply overflow-x-hidden;
+  }
+}
+
+/* Mobile-first media queries */
+@media (pointer: coarse) {
+  body {
+    @apply touch-pan-y;
+  }
+}
 /* @keyframes float {
   0%, 100% {
     transform: 
