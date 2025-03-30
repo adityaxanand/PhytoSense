@@ -181,47 +181,50 @@ const handleGenerateInfo = async () => {
           <FaMicroscope className="w-8 h-8 text-emerald-600" />
         </div>
 
-        {/* Drag/Drop Area */}
-        <div
-          {...getRootProps({onClick: (e) => {
-            e.stopPropagation();
-          }})}
-          className="group relative h-96 rounded-2xl border-2 border-dashed border-gray-200 bg-blue-50/50 cursor-pointer flex flex-col items-center justify-center gap-6 transition-all hover:border-emerald-500"
+        <div className="group relative h-96 rounded-2xl border-2 border-dashed border-gray-200 bg-blue-50/50 transition-all hover:border-emerald-500">
+        {/* Dropzone Area */}
+        <div 
+          {...getRootProps({
+            onClick: (e) => e.stopPropagation() // Prevent parent click propagation
+          })} 
+          className="h-full w-full flex flex-col items-center justify-center gap-6 cursor-pointer"
         >
-          <input {...getInputProps({onClick: (e) => {
-            e.stopPropagation();
-          }})} />
+          <input {...getInputProps()} />
           <FiUpload className="w-16 h-16 text-emerald-600 mb-4 mx-auto" />
           <div className="text-center space-y-2">
             <h2 className="text-2xl font-bold text-gray-800">
               Drag Plant Image
             </h2>
             <p className="text-gray-600">
-              Supported formats: PNG, JPG, JPEG {/*, WEBP (max 5MB) */}
+              Supported formats: PNG, JPG, JPEG
             </p>
-            <div className="pt-4">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  triggerCamera();
-                }}
-                className="inline-flex items-center gap-2 px-6 py-2 bg-white text-emerald-600 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer shadow-sm z-50"
-                type="button"
-              >
-                <FiCamera className="w-5 h-5" />
-                Capture Photo
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  onChange={handleCameraCapture}
-                  className="hidden"
-                />
-              </button>
-            </div>
           </div>
         </div>
+
+        {/* Camera Button - Separated from Dropzone */}
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              triggerCamera();
+            }}
+            className="inline-flex items-center gap-2 px-6 py-2 bg-white text-emerald-600 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer shadow-sm"
+          >
+            <FiCamera className="w-5 h-5" />
+            Capture Photo
+          </button>
+          {/* Camera Input - Outside Dropzone */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleCameraCapture}
+            className="hidden"
+          />
+        </div>
+      </div>
 
         {/* Preview Section */}
         {preview && (
