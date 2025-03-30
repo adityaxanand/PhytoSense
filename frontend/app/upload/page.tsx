@@ -183,10 +183,14 @@ const handleGenerateInfo = async () => {
 
         {/* Drag/Drop Area */}
         <div
-          {...getRootProps()}
+          {...getRootProps({onClick: (e) => {
+            e.stopPropagation();
+          }})}
           className="group relative h-96 rounded-2xl border-2 border-dashed border-gray-200 bg-blue-50/50 cursor-pointer flex flex-col items-center justify-center gap-6 transition-all hover:border-emerald-500"
         >
-          <input {...getInputProps()} />
+          <input {...getInputProps({onClick: (e) => {
+            e.stopPropagation();
+          }})} />
           <FiUpload className="w-16 h-16 text-emerald-600 mb-4 mx-auto" />
           <div className="text-center space-y-2">
             <h2 className="text-2xl font-bold text-gray-800">
@@ -197,8 +201,11 @@ const handleGenerateInfo = async () => {
             </p>
             <div className="pt-4">
               <button
-                onClick={triggerCamera}
-                className="inline-flex items-center gap-2 px-6 py-2 bg-white text-emerald-600 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer shadow-sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  triggerCamera();
+                }}
+                className="inline-flex items-center gap-2 px-6 py-2 bg-white text-emerald-600 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer shadow-sm z-50"
                 type="button"
               >
                 <FiCamera className="w-5 h-5" />
