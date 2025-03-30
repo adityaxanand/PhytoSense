@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     **## Case Studies** 
     [2-3 brief real-world examples with successful management]
     
-    Format using markdown with emoji section headers. Use simple language for farmers. Highlight confidence-related uncertainties. Include metric/imperial units.`
+    Format using markdown with emoji section headers. Use simple language for farmers. Highlight confidence-related uncertainties. Include metric/imperial units and evth..` 
 
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`
     
