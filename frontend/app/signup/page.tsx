@@ -1,35 +1,37 @@
+// app/signup/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { FiUserPlus } from 'react-icons/fi';
+import { motion } from 'framer-motion';
+import { FiUserPlus, FiArrowRight, FiLock, FiMail } from 'react-icons/fi';
+import { FaLeaf } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import { auth } from '../firebase/firebaseConfig';
-import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { FirebaseError } from 'firebase/app';
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { useAuth } from '../context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function Signup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const { user } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+      setError("Passwords don't match");
       return;
     }
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      alert('Signup successful!');
-      // Redirect or perform additional actions upon successful signup
-    } catch (error) {
-      const err = error as unknown;
-      if (err instanceof Error) {
-        alert(err.message);
-      } else {
-        alert('An unknown error occurred.');
-      }
+      router.push('/');
+    } catch {
+      setError('Error creating account');
     }
   };
 
@@ -37,72 +39,167 @@ export default function Signup() {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      alert('Google signup successful!');
-      // Redirect or perform additional actions upon successful signup
-    } catch (error) {
-      if (error instanceof FirebaseError) {
-        alert(error.message);
-      } else {
-        alert('An unknown error occurred.');
-      }
+      router.push('/');
+    } catch {
+      setError('Google signup failed');
     }
   };
 
+  if (user) router.push('/');
+
+
+  // FLoating Leaves Part
+  interface Leaf {
+      id: number;
+      style: {
+        left: string;
+        top: string;
+        scale: number;
+        rotate: number;
+      };
+    }
+  
+    const [floatingLeaves, setFloatingLeaves] = useState<Array<Leaf>>([]);
+    useEffect(() => {
+      // Generate leaves only on client side
+      const generatedLeaves = Array(12).fill(null).map((_, i) => ({
+        id: i,
+        style: {
+          left: `${Math.random() * 100}%`,
+          top: `${Math.random() * 100}%`,
+          scale: 0.5 + Math.random() * 0.5,
+          rotate: Math.random() * 360
+        }
+      }));
+      setFloatingLeaves(generatedLeaves);
+    }, []);
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-green-50">
-      <h1 className="text-4xl font-bold mb-6 text-green-900 drop-shadow-lg animate-fadeIn">
-        Sign Up
-      </h1>
-      <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
-        <div className="relative">
-          <label className="block text-green-800 mb-1">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-green-300 transition-all transform hover:scale-105"
-            required
-          />
-        </div>
-        <div className="relative">
-          <label className="block text-green-800 mb-1">Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-green-300 transition-all transform hover:scale-105"
-            required
-          />
-        </div>
-        <div className="relative">
-          <label className="block text-green-800 mb-1">Confirm Password</label>
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-green-300 transition-all transform hover:scale-105"
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          className="w-full bg-green-800 text-white py-3 rounded-lg shadow-xl transition-all duration-300 transform hover:scale-105 hover:bg-green-900"
-        >
-          <FiUserPlus className="inline mr-2" /> Sign Up
-        </button>
-      </form>
-      <p className="mt-4 text-green-800">
-        Already have an account?{' '}
-        <Link href="/login" className="text-green-800 underline hover:text-green-900 transition-colors">
-          Login
-        </Link>
-      </p>
-      <button
-        onClick={handleGoogleSignup}
-        className="mt-6 w-full max-w-md flex items-center justify-center gap-2 border border-gray-300 text-gray-700 py-2 rounded-lg shadow-md transition-all duration-300 hover:bg-gray-100 transform hover:scale-105"
+    <div className="bg-[#f8fcf8] pt-35 min-h-screen flex items-center justify-center p-6 relative overflow-hidden"> {/* bg-slate-50*/}
+      {/* Floating Leaves Background */}
+            <div className="fixed inset-0 pointer-events-none">
+              {floatingLeaves.map((leaf) => (
+                <motion.div
+                  key={leaf.id}
+                  className="absolute text-green-300/30"
+                  initial={{ y: 0, x: 0, rotate: leaf.style.rotate }}
+                  animate={{
+                    y: [0, -100, -200, 0],
+                    x: [0, 50, -50, 0],
+                    rotate: leaf.style.rotate + 360
+                  }}
+                  transition={{
+                    duration: 15 + Math.random() * 10,
+                    repeat: Infinity,
+                    ease: "linear"
+                  }}
+                  style={leaf.style}
+                >
+                  <FaLeaf className="w-8 h-8" />
+                </motion.div>
+              ))}
+            </div>
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8"
       >
-        <FcGoogle size={24} /> Continue with Google
-      </button>
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 bg-emerald-100 rounded-2xl mx-auto flex items-center justify-center mb-4">
+            <FiUserPlus className="w-8 h-8 text-emerald-600" />
+          </div>
+          <h1 className="text-3xl font-bold text-slate-800 mb-2">Create Account</h1>
+          <p className="text-slate-600">Start your plant care journey</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
+            <div className="relative">
+              <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
+            <div className="relative">
+              <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Confirm Password</label>
+            <div className="relative">
+              <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                required
+              />
+            </div>
+          </div>
+
+          {error && <p className="text-rose-600 text-sm">{error}</p>}
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            type="submit"
+            className="w-full bg-emerald-600 cursor-pointer text-white py-3.5 rounded-xl font-medium flex items-center justify-center gap-2"
+          >
+            <FiUserPlus className="w-5 h-5" />
+            Create Account
+          </motion.button>
+
+          <div className="my-6 flex items-center">
+            <div className="flex-1 border-t border-slate-200"></div>
+            <span className="px-4 text-slate-500 text-sm">or continue with</span>
+            <div className="flex-1 border-t border-slate-200"></div>
+          </div>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleGoogleSignup}
+            className="w-full bg-white border cursor-pointer border-slate-200 py-3.5 rounded-xl flex items-center justify-center gap-3"
+          >
+            <FcGoogle className="w-6 h-6" />
+            <span className="text-slate-700 font-medium">Google</span>
+          </motion.button>
+
+          <p className="mt-8 text-center text-slate-600">
+            Already have an account?{' '}
+            <Link
+              href="/login"
+              className="text-emerald-600 font-medium hover:text-emerald-700 inline-flex items-center gap-1"
+            >
+              Login <FiArrowRight className="mt-1" />
+            </Link>
+          </p>
+        </form>
+      </motion.div>
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        body {
+          font-family: 'Poppins', sans-serif;
+        }
+      `}</style>
     </div>
   );
 }

@@ -2,220 +2,379 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import {
-  FiUpload,
-  FiActivity,
-  FiBarChart2,
-  FiGlobe,
-  FiArrowRight,
-  FiLogIn,
-  FiUserPlus,
-  FiMenu,
-  FiX,
+import { motion, useTransform, useScroll } from 'framer-motion';
+import { 
+  FiUpload, 
+  FiActivity, 
+  FiBarChart2, 
+  FiGlobe, 
+  FiArrowRight, 
+  FiLinkedin,
+  FiTwitter,
+  FiGithub,
+  FiPlay,
+  FiInfo
 } from 'react-icons/fi';
-import { FaLeaf } from 'react-icons/fa';
-import AuthStateListener from './context/AuthStateListener';
+import { FaLeaf, FaSeedling } from 'react-icons/fa';
+import { FaBoxesStacked } from 'react-icons/fa6';
+import ScrollIndicator from './components/ScrollIndicator';
 
 export default function Home() {
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { scrollYProgress } = useScroll();
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.2]);
 
-  // Update scroll progress meter based on scroll position
   useEffect(() => {
     const handleScroll = () => {
-      const totalScroll =
-        document.documentElement.scrollHeight -
-        document.documentElement.clientHeight;
-      const currentScroll = window.scrollY;
-      const percent = (currentScroll / totalScroll) * 100;
-      setScrollProgress(percent);
+      const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress((window.scrollY / totalScroll) * 100);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Markers for timeline (desktop only)
-  const markers = [
-    { threshold: 10, label: 'Upload', icon: <FiUpload size={18} /> },
-    { threshold: 40, label: 'Detect', icon: <FiActivity size={18} /> },
-    { threshold: 70, label: 'Analyze', icon: <FiBarChart2 size={18} /> },
-    { threshold: 90, label: 'Impact', icon: <FiGlobe size={18} /> },
+  const features = [
+    { icon: FiUpload, title: "Easy Image Upload", color: "bg-amber-400" },
+    { icon: FiActivity, title: "Accurate Detection", color: "bg-emerald-400" },
+    { icon: FiBarChart2, title: "Detailed Analysis", color: "bg-teal-400" },
+    { icon: FiGlobe, title: "Global Impact", color: "bg-sky-400" },
   ];
 
+
+  //FLoating Elements
+  const [floatingLeaves, setFloatingLeaves] = useState<{ id: number; style: { left: string; top: string; scale: number; rotate: number } }[]>([]);
+  
+  useEffect(() => {
+    const leaves = [...Array(12)].map((_, i) => ({
+      id: i,
+      style: {
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        scale: 0.5 + Math.random() * 0.5,
+        rotate: Math.random() * 360
+      }
+    }));
+    setFloatingLeaves(leaves);
+  }, []);
+
   return (
-    <>
-    <AuthStateListener>
-      {/* Add your children components here */}
-      <div className="relative bg-green-50 text-slate-800 min-h-screen">
-        {/* Vertical Timeline Meter (hidden on mobile) */}
-        <div className="hidden md:block fixed left-4 top-1/2 transform -translate-y-1/2 z-50">
-          <div className="w-2 h-80 bg-gray-200 rounded-full relative overflow-hidden shadow-inner">
-            <div
-              style={{ height: `${scrollProgress}%` }}
-              className="bg-green-800 rounded-full transition-all duration-300"
-            ></div>
-            {markers.map((marker, idx) => {
-              const active = scrollProgress >= marker.threshold;
-              return (
-                <div
-                  key={idx}
-                  style={{ top: `${(marker.threshold / 100) * 80 - 7}px` }}
-                  className={`absolute left-[-6px] flex items-center gap-1 transform -translate-y-1/2 transition-all duration-300 text-xs font-medium ${
-                    active ? 'text-green-800' : 'text-gray-400'
-                  }`}
+    <div className="min-h-screen bg-gradient-to-b from-white to-emerald-50">
+      {/* Floating Leaves Background */}
+            <div className="fixed inset-0 pointer-events-none">
+              {floatingLeaves.map((leaf) => (
+                <motion.div
+                  key={leaf.id}
+                  className="absolute text-green-300/30"
+                  initial={{ y: 0, x: 0, rotate: leaf.style.rotate }}
+                  animate={{
+                    y: [0, -100, -200, 0],
+                    x: [0, 50, -50, 0],
+                    rotate: leaf.style.rotate + 360
+                  }}
+                  transition={{
+                    duration: 15 + Math.random() * 10,
+                    repeat: Infinity,
+                    ease: "linear"
+                  }}
+                  style={leaf.style}
                 >
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      active ? 'bg-green-800' : 'bg-gray-400'
-                    }`}
-                  ></div>
-                  <span>{marker.label}</span>
-                  <span>{marker.icon}</span>
-                </div>
-              );
-            })}
+                  <FaLeaf className="w-8 h-8" />
+                </motion.div>
+              ))}
+            </div>
+
+      {/* Animated Progress Orb */}
+      <motion.div 
+        className="fixed right-8 bottom-8 w-16 h-16 rounded-full bg-emerald-500 shadow-xl z-50"
+        style={{ scale }}
+      >
+        <div className="absolute inset-0 flex items-center justify-center text-white font-bold">
+          {Math.round(scrollProgress)}%
+        </div>
+      </motion.div>
+
+      {/* Hero Section */}
+      <section className="relative min-h-screen flex flex-col justify-center items-center px-4">
+        <motion.div 
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 100 }}
+          className="text-center"
+        >
+          <div className="relative inline-block">
+            <FaLeaf className="text-emerald-900 w-24 h-24 mb-8 animate-float" />
+            <div className="absolute inset-0 bg-emerald-100 blur-2xl opacity-50 rounded-full" />
+          </div>
+            <h1 className="text-6xl font-bold text-emerald-800 mb-6 font-sans font-poppins font-extrabold">
+            Phyto<span className="text-stone-700">Sense</span>
+            </h1>
+          <p className="text-2xl text-emerald-700 mb-12 max-w-2xl leading-relaxed font-semibold">
+            Revolutionizing agriculture through AI-powered plant health analysis
+          </p>
+          <motion.div whileHover={{ scale: 1 }}>
+            <Link
+              href="/upload"
+              className="inline-flex items-center px-12 py-5 bg-emerald-800 text-white rounded-full 
+              hover:bg-emerald-900 transition-all shadow-lg text-lg font-medium group"
+            >
+              <span>Get Started</span>
+              <FiArrowRight className="ml-4 transform group-hover:translate-x-2 transition-transform" />
+            </Link>
+          </motion.div>
+        </motion.div>
+
+        {/* Scrolling Indicator */}
+        <ScrollIndicator />
+      </section>
+
+      {/* Feature Grid */}
+      <section className="py-20 px-4">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {features.map((feature, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6, delay: i * 0.2 }}
+          className={`p-8 rounded-3xl ${feature.color} bg-opacity-30 backdrop-blur-md 
+          hover:bg-opacity-40 hover:shadow-xl transition-all duration-300 group`}
+        >
+          <div className="mb-6 flex items-center justify-center w-16 h-16 rounded-full bg-white bg-opacity-20 shadow-md group-hover:scale-110 transition-transform">
+            <feature.icon className="w-10 h-10 text-yellow-600 group-hover:text-opacity-90 transition-colors" />
+          </div>
+          <h3 className="text-xl font-semibold text-white text-opacity-90 mb-4 font-sans tracking-wide group-hover:text-opacity-100 transition-colors">
+            {feature.title}
+          </h3>
+          <p className="text-white text-opacity-70 leading-relaxed font-light group-hover:text-opacity-90 transition-colors">
+            {[
+          "Intuitive interface for quick plant image submission",
+          "Advanced neural networks for precise disease detection",
+          "Comprehensive health reports with actionable insights",
+          "Supporting sustainable farming worldwide"
+            ][i]}
+          </p>
+        </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Interactive Demo Section */}
+      <section className="py-20 px-4 bg-emerald-50">
+        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12">
+          <div className="flex-1 space-y-8">
+            <h2 className="text-5xl font-extrabold text-emerald-800 leading-tight">
+              See It in Action
+            </h2>
+            <p className="text-emerald-700 text-lg leading-relaxed">
+              Experience how PhytoSense leverages cutting-edge computer vision to analyze plant health in real-time.
+            </p>
+            <div className="flex gap-6">
+              <motion.button
+                whileHover={{ scale: 1 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-[10px] shadow-lg hover:shadow-xl transition-all duration-300 text-lg font-medium tracking-wide"
+                onClick={() => {
+                  const iframe = document.querySelector('iframe');
+                  if (iframe) {
+                    iframe.src += "&autoplay=1";
+                  }
+                }}
+              >
+                <span className="flex items-center gap-2">
+                  <FiPlay className="w-5 h-5" />
+                  Watch Demo
+                </span>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-4 border-2 cursor-pointer border-emerald-500 text-emerald-500 rounded-[10px] shadow-lg hover:bg-emerald-50 hover:text-emerald-600 transition-all duration-300 text-lg font-medium tracking-wide"
+              >
+                <span className="flex items-center gap-2">
+                  <FiInfo className="w-5 h-5" />
+                  Learn More
+                </span>
+              </motion.button>
+            </div>
+          </div>
+          <div className="flex-1 relative">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="aspect-video bg-emerald-100 rounded-2xl shadow-xl overflow-hidden"
+            >
+              <iframe
+                className="w-full h-full"
+                src="https://www.youtube.com/embed/0w9YHhMmd5c?si=oSutJnVHB9VHT-iz"
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 50, y: -50 }}
+              whileInView={{ opacity: 1, x: 0, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+              className="absolute -top-6 -right-6 w-24 h-24 bg-amber-300 rounded-2xl rotate-12 shadow-lg"
+            />
+            <motion.div
+              initial={{ opacity: 0, x: -50, y: 50 }}
+              whileInView={{ opacity: 1, x: 0, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
+              className="absolute -bottom-6 -left-6 w-24 h-24 bg-teal-300 rounded-2xl -rotate-12 shadow-lg"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-20 px-4 bg-gradient-to-b from-emerald-50 to-white">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl font-bold text-center text-emerald-800 mb-12">
+        Our Achievements
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+        {[
+          { value: "99%+", label: "Accuracy Rate", icon: FiBarChart2 },
+          { value: "75K+", label: "Plants Analyzed", icon: FaSeedling },
+          { value: "38+", label: "Diseases Detected", icon: FiActivity },
+          { value: "6+", label: "Models", icon: FaBoxesStacked },
+        ].map((stat, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: i * 0.2 }}
+            className="relative p-8 text-center bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-shadow duration-300 group"
+          >
+            <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
+          <stat.icon className="w-8 h-8 text-emerald-600" />
+            </div>
+            <div className="mt-10 text-5xl font-extrabold text-emerald-700 group-hover:text-emerald-800 transition-colors duration-300">
+          {stat.value}
+            </div>
+            <div className="text-lg font-medium text-emerald-600 group-hover:text-emerald-700 transition-colors duration-300">
+          {stat.label}
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-50 to-emerald-100 opacity-0 group-hover:opacity-20 rounded-3xl transition-opacity duration-300"></div>
+          </motion.div>
+        ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-slate-900 text-white">
+      <div className="max-w-7xl mx-auto px-4 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+          {/* Company Info */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 mb-6">
+              <FaLeaf className="w-8 h-8 text-emerald-400" />
+              <span className="text-xl font-semibold">PhytoSense</span>
+            </div>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              Empowering agriculture through intelligent plant health solutions
+            </p>
+          </div>
+
+          {/* Quick Links */}
+          <div className="space-y-4">
+            <h4 className="text-emerald-400 font-medium mb-4">Solutions</h4>
+            <nav className="space-y-3">
+              <Link href="/farmers" className="block text-slate-300 hover:text-emerald-400 transition-colors text-sm">
+                For Farmers
+              </Link>
+              <Link href="/enterprise" className="block text-slate-300 hover:text-emerald-400 transition-colors text-sm">
+                Application Solutions
+              </Link>
+              <Link href="/research" className="block text-slate-300 hover:text-emerald-400 transition-colors text-sm">
+                Research
+              </Link>
+            </nav>
+          </div>
+
+          {/* Resources */}
+          <div className="space-y-4">
+            <h4 className="text-emerald-400 font-medium mb-4">Resources</h4>
+            <nav className="space-y-3">
+              <Link href="/blog" className="block text-slate-300 hover:text-emerald-400 transition-colors text-sm">
+                Insights
+              </Link>
+              <Link href="/documentation" className="block text-slate-300 hover:text-emerald-400 transition-colors text-sm">
+                Documentation
+              </Link>
+              <Link href="/case-studies" className="block text-slate-300 hover:text-emerald-400 transition-colors text-sm">
+                Case Studies
+              </Link>
+            </nav>
+          </div>
+
+          {/* Contact */}
+          <div className="space-y-4">
+            <h4 className="text-emerald-400 font-medium mb-4">Connect</h4>
+            <div className="space-y-3 text-sm">
+              <p className="text-slate-300">contact@phytosense.com</p>
+              <p className="text-slate-300">+91 69696 96969</p>
+              <div className="flex gap-4 mt-4">
+                <Link href="#" className="text-slate-300 hover:text-emerald-400 transition-colors">
+                  <FiLinkedin className="w-5 h-5" />
+                </Link>
+                <Link href="#" className="text-slate-300 hover:text-emerald-400 transition-colors">
+                  <FiTwitter className="w-5 h-5" />
+                </Link>
+                <Link href="#" className="text-slate-300 hover:text-emerald-400 transition-colors">
+                  <FiGithub className="w-5 h-5" />
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Navbar */}
-        <nav className="flex justify-between items-center p-6 bg-white bg-opacity-95 shadow-sm sticky top-0 z-40">
-          <div className="flex items-center space-x-2">
-            <FaLeaf size={28} className="text-green-800 animate-spin-slow" />
-            <span className="text-xl font-bold text-green-800">PhytoSense</span>
-          </div>
-          {/* Desktop Nav */}
-          <div className="hidden md:flex space-x-4">
-            <Link
-              href="/login"
-              className="flex items-center justify-center w-32 h-10 border-2 border-blue-900 text-blue-900 bg-transparent rounded-lg transition-all duration-300 transform hover:scale-105 hover:bg-blue-900 hover:text-white text-base"
-            >
-              <FiLogIn className="mr-1" /> Login
-            </Link>
-            <Link
-              href="/signup"
-              className="flex items-center justify-center w-32 h-10 border-2 border-blue-900 text-blue-900 bg-transparent rounded-lg transition-all duration-300 transform hover:scale-105 hover:bg-blue-900 hover:text-white text-base"
-            >
-              <FiUserPlus className="mr-1" /> Signup
-            </Link>
-          </div>
-          {/* Mobile Nav Toggle */}
-          <div className="md:hidden">
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              {mobileMenuOpen ? (
-                <FiX size={24} className="text-green-800" />
-              ) : (
-                <FiMenu size={24} className="text-green-800" />
-              )}
-            </button>
-          </div>
-        </nav>
-        {/* Mobile Nav Popup */}
-        {mobileMenuOpen && (
-          <div className="md:hidden absolute top-20 right-4 bg-white shadow-lg rounded-lg p-4 flex flex-col space-y-2 z-50">
-            <Link
-              href="/login"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-center w-full h-10 border-2 border-blue-900 text-blue-900 bg-transparent rounded-lg transition-all duration-300 hover:bg-blue-900 hover:text-white text-sm"
-            >
-              <FiLogIn className="mr-1" /> Login
-            </Link>
-            <Link
-              href="/signup"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-center w-full h-10 border-2 border-blue-900 text-blue-900 bg-transparent rounded-lg transition-all duration-300 hover:bg-blue-900 hover:text-white text-sm"
-            >
-              <FiUserPlus className="mr-1" /> Signup
-            </Link>
-          </div>
-        )}
-
-        {/* Hero Section */}
-        <section className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-r from-green-50 to-green-100 px-4 py-12">
-          <FaLeaf size={64} className="text-green-800 mb-4 animate-bounce" />
-          <h1 className="text-5xl font-extrabold text-green-900 mb-4 text-center drop-shadow-md">
-            Welcome to PhytoSense
-          </h1>
-          <p className="text-2xl text-gray-700 mb-8 max-w-3xl text-center">
-            Advanced AI-powered plant disease detection to safeguard your crops globally.
+        <div className="border-t border-slate-800 pt-8 text-center">
+          <p className="text-slate-400 text-sm">
+            © {new Date().getFullYear()} PhytoSense. All rights reserved.
           </p>
-          <Link
-            href="/upload"
-            className="inline-flex items-center px-8 py-4 bg-green-800 text-white rounded-full hover:bg-green-900 transition-colors duration-300 shadow-lg"
-          >
-            Get Started <FiArrowRight className="ml-3" />
-          </Link>
-        </section>
-
-        {/* Scrolling Content Sections in Soft Card Format */}
-        <section className="px-6 py-12 bg-white">
-          <div className="max-w-4xl mx-auto space-y-20">
-            {/* Section 1: Easy Image Upload */}
-            <div className="p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-              <div className="flex items-center gap-4 mb-4">
-                <FiUpload size={32} className="text-green-800" />
-                <h2 className="text-4xl font-semibold text-green-900">Easy Image Upload</h2>
-              </div>
-              <p className="text-xl text-gray-600">
-                Simply drag &amp; drop your plant image or capture it using your device&apos;s camera.
-              </p>
-            </div>
-            {/* Section 2: Accurate Detection */}
-            <div className="p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-              <div className="flex items-center gap-4 mb-4">
-                <FiActivity size={32} className="text-green-800" />
-                <h2 className="text-4xl font-semibold text-green-900">Accurate Detection</h2>
-              </div>
-              <p className="text-xl text-gray-600">
-                Our state-of-the-art AI analyzes your images in real time, ensuring reliable and precise diagnostics.
-              </p>
-            </div>
-            {/* Section 3: Detailed Analysis */}
-            <div className="p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-              <div className="flex items-center gap-4 mb-4">
-                <FiBarChart2 size={32} className="text-green-800" />
-                <h2 className="text-4xl font-semibold text-green-900">Detailed Analysis</h2>
-              </div>
-              <p className="text-xl text-gray-600">
-                Receive comprehensive insights and actionable recommendations to improve plant health and maximize yields.
-              </p>
-            </div>
-            {/* Section 4: Global Impact */}
-            <div className="p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-              <div className="flex items-center gap-4 mb-4">
-                <FiGlobe size={32} className="text-green-800" />
-                <h2 className="text-4xl font-semibold text-green-900">Global Impact</h2>
-              </div>
-              <p className="text-xl text-gray-600">
-                Trusted by farmers worldwide, PhytoSense is revolutionizing sustainable agriculture on a global scale.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Footer */}
-        <footer className="p-6 bg-white text-center shadow-sm">
-          © {new Date().getFullYear()} PhytoSense
-        </footer>
+        </div>
       </div>
-
+      </footer>
       <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
         body {
-          font-family: 'Roboto', sans-serif;
+          font-family: 'Poppins', sans-serif;
         }
+
         @keyframes spin-slow {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes float {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-15px); }
+          100% { transform: translateY(0px); }
         }
         .animate-spin-slow {
-          animation: spin-slow 4s linear infinite;
+          animation: spin-slow 20s linear infinite;
         }
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+
+        @keyframes scroll-pulse {
+        0% { transform: translateY(0); opacity: 0.8; }
+        50% { transform: translateY(8px); opacity: 1; }
+        100% { transform: translateY(0); opacity: 0.8; }
+      }
       `}</style>
-      </AuthStateListener>
-    </>
+    </div>
   );
 }

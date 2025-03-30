@@ -1,0 +1,16 @@
+/* // Instead of <style jsx global>, create a CSS module:
+// team.module.css */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animateSpinSlow {
+  animation: spin-slow 20s linear infinite;
+}
+
+/* // Then import in component:
+import styles from './team.module.css';
+
+// Use in JSX:
+<FaLeaf className={styles.animateSpinSlow} /> */

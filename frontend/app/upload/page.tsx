@@ -1,590 +1,300 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import Link from 'next/link';
 import Image from 'next/image';
-import {
-  FiArrowLeft,
-  FiCamera,
-  FiUpload,
-} from 'react-icons/fi';
-import { FaLeaf } from 'react-icons/fa';
+import { motion } from 'framer-motion';
+import { FiArrowUpRight, FiCamera, FiUpload, FiZap, FiActivity } from 'react-icons/fi';
+import { FaLeaf, FaMicroscope } from 'react-icons/fa';
+import DiseaseInfo from '../components/DiseaseInfo'
+
+const Particles = () => (
+  <div className="absolute inset-0 pointer-events-none">
+    {[...Array(30)].map((_, i) => (
+      <div
+        key={i}
+        className="absolute w-1 h-1 bg-emerald-600/20 rounded-full"
+        style={{
+          left: `${Math.random() * 100}%`,
+          top: `${Math.random() * 100}%`,
+          animation: `float ${10 + Math.random() * 20}s infinite linear`,
+        }}
+        suppressHydrationWarning
+      />
+    ))}
+  </div>
+);
 
 export default function Upload() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [result, setResult] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [preview, setPreview] = useState<string | null>(null)
+  const [result, setResult] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [hasResults, setHasResults] = useState(false);
+  const [generatedInfo, setGeneratedInfo] = useState<string>('')
+  const [loadingInfo, setLoadingInfo] = useState<boolean>(false)
 
-  // Handle drag-and-drop
+
+    useEffect(() => {
+      if (hasResults) {
+        window.scrollTo({
+          top: document.body.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    }, [hasResults]);
+
   const onDrop = (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
+    // if (file.size > 5 * 1024 * 1024) {
+    //   alert('File size too large (max 5MB)');
+    //   return;
+    // }
     setSelectedFile(file);
     setPreview(URL.createObjectURL(file));
+
+    // Reset the generated info when new file is selected
+    setGeneratedInfo('');
+    setResult('');
   };
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
-    accept: { 'image/*': [] },
+    accept: { 'image/*': ['.png', '.jpg', '.jpeg'] },
+    // maxSize: 5 * 1024 * 1024
   });
 
-  // Handle camera capture
+  const triggerCamera = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleCameraCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
+    if (event.target.files?.[0]) {
       const file = event.target.files[0];
+      // if (file.size > 5 * 1024 * 1024) {
+      //   alert('File size too large (max 5MB)');
+      //   return;
+      // }
       setSelectedFile(file);
       setPreview(URL.createObjectURL(file));
+
+      // Reset the generated info when new file is selected
+      setGeneratedInfo('');
+      setResult('');
     }
   };
 
-  // Submit image for inference by calling our API route
   const handleSubmit = async () => {
     if (!selectedFile) {
-      alert('Please upload an image first.');
-      return;
+      alert('Please upload an image first.')
+      return
     }
-    setLoading(true);
-    const formData = new FormData();
-    formData.append('file', selectedFile);
+    
+    setLoading(true)
+
+    // Reset the generated info when new file is selected
+    setGeneratedInfo('');
+    setResult('');
+    setHasResults(false) // Reset results state
+    const formData = new FormData()
+    formData.append('file', selectedFile)
+    
 
     try {
-      // Call our Next.js API route that proxies to the model endpoint
       const res = await fetch('/api/infer', {
         method: 'POST',
         body: formData,
-      });
-      const data = await res.json();
-      if (data.result) {
-        setResult(data.result);
-      } else if (data.error) {
-        setResult('Error: ' + data.error);
-      }
-    } catch (error) {
-      console.error('Error during inference:', error);
-      setResult("Error processing the image.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <>
-      <div className="min-h-screen bg-green-50 flex flex-col items-center py-10 px-4">
-        {/* Back to Home Link */}
-        <Link
-          href="/"
-          className="flex items-center text-green-800 hover:text-green-900 self-start mb-4 transition-colors duration-300"
-        >
-          <FiArrowLeft className="mr-1" /> Back to Home
-        </Link>
-
-        {/* Main Card */}
-        <div className="bg-white rounded-lg shadow-xl p-10 max-w-3xl w-full transition-transform duration-500 ease-in-out md:hover:scale-105">
-          {/* Header with Plant Icon and Tagline */}
-          <div className="flex flex-col items-center mb-6">
-            <FaLeaf className="text-green-800 animate-pulse" size={52} />
-            <h1 className="text-3xl font-bold text-green-900 mt-2">
-              Upload Your Plant Image
-            </h1>
-            <p className="text-green-700 italic mt-1">
-              Diagnose plant diseases at the speed of light.
-            </p>
-          </div>
-
-          <hr className="border-green-300 mb-6" />
-
-          {/* Drag & Drop Section */}
-          <div className="mb-8">
-            <div
-              {...getRootProps()}
-              className="border-2 border-dashed border-green-800 rounded-lg p-8 flex flex-col items-center justify-center cursor-pointer hover:border-green-900 transition-all duration-300"
-            >
-              <input {...getInputProps()} />
-              <FiUpload size={56} className="text-green-800 mb-2 animate-bounce" />
-              <p className="text-green-900 font-medium text-lg">
-                Drag &amp; drop your image here or click to select one
-              </p>
-            </div>
-          </div>
-
-          {/* Camera Capture Button */}
-          <div className="mb-8 flex justify-center">
-            <div className="flex flex-col items-center">
-              <label
-                htmlFor="cameraInput"
-                className="bg-green-800 text-white px-6 py-3 rounded-lg hover:bg-green-900 cursor-pointer transition-transform duration-300 ease-in-out hover:scale-110 flex items-center shadow-xl"
-              >
-                <FiCamera size={22} className="mr-3" />
-                <span className="font-semibold">Capture &amp; Diagnose</span>
-              </label>
-              <input
-                id="cameraInput"
-                type="file"
-                accept="image/*"
-                capture="environment"
-                onChange={handleCameraCapture}
-                className="hidden"
-              />
-            </div>
-          </div>
-
-          {/* Preview Section */}
-          {preview && (
-            <div className="mb-8 transition-opacity duration-500 ease-in-out">
-              <h3 className="text-xl font-medium mb-2 text-green-900">Preview:</h3>
-              <div className="w-full relative h-64 border border-green-300 rounded-lg shadow-sm transition-all duration-300">
-                <Image 
-                  src={preview} 
-                  alt="Uploaded Preview" 
-                  fill 
-                  sizes="(max-width: 768px) 100vw, 800px"
-                  className="object-cover rounded-lg"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Submit Button */}
-          <button
-            onClick={handleSubmit}
-            className="w-full bg-green-800 text-white py-3 rounded-lg mt-4 hover:bg-green-900 transition-colors duration-300 transform hover:scale-105 shadow-lg"
-            disabled={loading}
-          >
-            {loading ? "Processing..." : "Diagnose Now"}
-          </button>
-
-          {/* Inference Result */}
-          {result && (
-            <div className="mt-8 p-4 bg-green-100 border border-green-300 rounded-lg shadow-sm transition-all duration-300">
-              <h3 className="text-xl font-medium mb-2 text-green-900">Result:</h3>
-              <p className="text-green-800">{result}</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
-        body {
-          font-family: 'Poppins', sans-serif;
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
         }
-      `}</style>
-    </>
-  );
+      })
+      
+      if (!res.ok) throw new Error(await res.text())
+      
+      const data = await res.json()
+      setResult(data.result || data.error || 'Unknown result')
+      setHasResults(true) // Set to true when we have results
+    } catch (error) {
+      console.error('Error:', error)
+      setResult("Error processing the image. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+
+const handleGenerateInfo = async () => {
+  if (!result) {
+    alert('No diagnosis results available')
+    return
+  }
+
+  setLoadingInfo(true)
+  try {
+    const res = await fetch('/api/generate-info', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ diagnosis: result })
+    })
+
+    const data = await res.json()
+    
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to generate detailed report')
+    }
+
+    if (!data.info) {
+      throw new Error('Received empty response from the server')
+    }
+
+    setGeneratedInfo(data.info)
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Generation error:', error)
+      setGeneratedInfo(`Error: ${error.message}`)
+    } else {
+      console.error('Unknown error:', error)
+      setGeneratedInfo('Error: Failed to generate detailed information')
+    }
+  } finally {
+    setLoadingInfo(false)
+  }
 }
 
 
+  return (
+    <div className="pt-15 min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-50 flex flex-col items-center justify-center relative overflow-hidden padding: pt-1 margin: mt-1">
+      <Particles />
+      
+      <div className={`relative bg-white/95 backdrop-blur-xl rounded-3xl border border-gray-200 p-8 shadow-xl w-full max-w-2xl mx-4 mb-8 ${hasResults ? 'min-h-[80vh]' : ''}`}>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-12">
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-emerald-600 hover:text-emerald-700 transition-colors group"
+          >
+            <FiArrowUpRight className="w-5 h-5 transition-transform group-hover:-translate-y-1" />
+            <span className="font-medium">Return Home</span>
+          </Link>
+          <FaMicroscope className="w-8 h-8 text-emerald-600" />
+        </div>
 
+        {/* Drag/Drop Area */}
+        <div
+          {...getRootProps()}
+          className="group relative h-96 rounded-2xl border-2 border-dashed border-gray-200 bg-blue-50/50 cursor-pointer flex flex-col items-center justify-center gap-6 transition-all hover:border-emerald-500"
+        >
+          <input {...getInputProps()} />
+          <FiUpload className="w-16 h-16 text-emerald-600 mb-4 mx-auto" />
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-bold text-gray-800">
+              Drag Plant Image
+            </h2>
+            <p className="text-gray-600">
+              Supported formats: PNG, JPG, JPEG {/*, WEBP (max 5MB) */}
+            </p>
+            <div className="pt-4">
+              <button
+                onClick={triggerCamera}
+                className="inline-flex items-center gap-2 px-6 py-2 bg-white text-emerald-600 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer shadow-sm"
+                type="button"
+              >
+                <FiCamera className="w-5 h-5" />
+                Capture Photo
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleCameraCapture}
+                  className="hidden"
+                />
+              </button>
+            </div>
+          </div>
+        </div>
 
+        {/* Preview Section */}
+        {preview && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mt-8 relative aspect-video rounded-xl overflow-hidden border border-gray-200 bg-gray-100"
+          >
+            <Image
+              src={preview}
+              alt="Preview"
+              fill
+              className="object-cover"
+            />
+          </motion.div>
+        )}
 
+        {/* Submit Button with FiZap */}
+        <button
+          onClick={handleSubmit}
+          disabled={loading}
+          className="w-full bg-gradient-to-r from-emerald-600 to-emerald-600 cursor-pointer text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 shadow-lg hover:shadow-emerald-200 transition-all mt-8 disabled:opacity-50"
+        >
+          {loading ? (
+            <div className="flex items-center gap-2">
+              <FiZap className="w-5 h-5 animate-pulse" />
+              Processing Analysis...
+            </div>
+          ) : (
+            <>
+              <FaLeaf className="w-5 h-5" />
+              Start Analysis
+            </>
+          )}
+        </button>
 
+        {/* Results Display */}
+        {result && (
+          <div className="mt-8 bg-white rounded-xl p-6 border border-gray-200 shadow-sm mb-8">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-3 bg-emerald-100 rounded-lg">
+                <FiActivity className="w-8 h-8 text-emerald-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-gray-800">Diagnosis Report</h3>
+                <p className="text-gray-700 mt-2">{result}</p>
+              </div>
+            </div>
 
+            {!generatedInfo && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mt-6"
+              >
+                <button
+                  onClick={handleGenerateInfo}
+                  disabled={loadingInfo}
+                  className="w-full bg-gradient-to-r from-green-100 to-green-70 cursor-pointer hover:from-teal-200 hover:to-green-100 text-emerald-700 px-6 py-4 rounded-xl font-medium flex items-center justify-center gap-3 transition-all duration-300"
+                >
+                  {loadingInfo ? (
+                    <>
+                      <FiZap className="animate-spin" />
+                      Generating Comprehensive Report...
+                    </>
+                  ) : (
+                    <>
+                      <FaMicroscope className="w-5 h-5" />
+                      Deep Dive Analysis
+                      <FiArrowUpRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </motion.div>
+            )}
 
-
-
-
-
-
-
-
-
-
-// 'use client';
-
-// import { useState } from 'react';
-// import { useDropzone } from 'react-dropzone';
-// import Link from 'next/link';
-// import Image from 'next/image';
-// import {
-//   FiArrowLeft,
-//   FiCamera,
-//   FiUpload,
-// } from 'react-icons/fi';
-// import { FaLeaf } from 'react-icons/fa';
-
-// export default function Upload() {
-//   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-//   const [preview, setPreview] = useState<string | null>(null);
-//   const [result, setResult] = useState<string>('');
-
-//   // Handle drag-and-drop
-//   const onDrop = (acceptedFiles: File[]) => {
-//     const file = acceptedFiles[0];
-//     setSelectedFile(file);
-//     setPreview(URL.createObjectURL(file));
-//   };
-
-//   const accept: { [mime: string]: string[] } = { 'image/*': [] };
-//   const { getRootProps, getInputProps } = useDropzone({
-//     onDrop,
-//     accept,
-//   });
-
-//   // Handle camera capture
-//   const handleCameraCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
-//     if (event.target.files && event.target.files[0]) {
-//       const file = event.target.files[0];
-//       setSelectedFile(file);
-//       setPreview(URL.createObjectURL(file));
-//     }
-//   };
-
-//   // Submit image for inference
-//   const handleSubmit = async () => {
-//     if (!selectedFile) {
-//       alert('Please upload an image first.');
-//       return;
-//     }
-//     const formData = new FormData();
-//     formData.append('file', selectedFile);
-
-//     try {
-//       const res = await fetch('/api/infer', {
-//         method: 'POST',
-//         body: formData,
-//       });
-//       const data = await res.json();
-//       setResult(data.result);
-//     } catch (error) {
-//       console.error('Error during inference:', error);
-//     }
-//   };
-
-//   return (
-//     <>
-//       <div className="min-h-screen bg-green-50 flex flex-col items-center py-10 px-4">
-//         {/* Back to Home Link */}
-//         <Link
-//           href="/"
-//           className="flex items-center text-green-800 hover:text-green-900 self-start mb-4 transition-colors duration-300"
-//         >
-//           <FiArrowLeft className="mr-1" /> Back to Home
-//         </Link>
-
-//         {/* Main Card - hover scaling only on md and above */}
-//         <div className="bg-white rounded-lg shadow-xl p-10 max-w-3xl w-full transition-transform duration-500 ease-in-out md:hover:scale-105">
-//           {/* Header with Plant Icon and Tagline */}
-//           <div className="flex flex-col items-center mb-6">
-//             <FaLeaf className="text-green-800 animate-pulse" size={52} />
-//             <h1 className="text-3xl font-bold text-green-900 mt-2">
-//               Upload Your Plant Image
-//             </h1>
-//             <p className="text-green-700 italic mt-1">
-//               Diagnose plant diseases at the speed of light.
-//             </p>
-//           </div>
-
-//           <hr className="border-green-300 mb-6" />
-
-//           {/* Drag & Drop Section */}
-//           <div className="mb-8">
-//             <div
-//               {...getRootProps()}
-//               className="border-2 border-dashed border-green-800 rounded-lg p-8 flex flex-col items-center justify-center cursor-pointer hover:border-green-900 transition-all duration-300"
-//             >
-//               <input {...getInputProps()} />
-//               <FiUpload size={56} className="text-green-800 mb-2 animate-bounce" />
-//               <p className="text-green-900 font-medium text-lg">
-//                 Drag &amp; drop your image here or click to select one
-//               </p>
-//             </div>
-//           </div>
-
-//           {/* Camera Capture Button */}
-//           <div className="mb-8 flex justify-center">
-//             <div className="flex flex-col items-center">
-//               <label
-//                 htmlFor="cameraInput"
-//                 className="bg-green-800 text-white px-6 py-3 rounded-lg hover:bg-green-900 cursor-pointer transition-transform duration-300 ease-in-out hover:scale-110 flex items-center shadow-xl"
-//               >
-//                 <FiCamera size={22} className="mr-3" />
-//                 <span className="font-semibold">Capture &amp; Diagnose</span>
-//               </label>
-//               <input
-//                 id="cameraInput"
-//                 type="file"
-//                 accept="image/*"
-//                 capture="environment"
-//                 onChange={handleCameraCapture}
-//                 className="hidden"
-//               />
-//             </div>
-//           </div>
-
-//           {/* Preview Section */}
-//           {preview && (
-//             <div className="mb-8 transition-opacity duration-500 ease-in-out">
-//               <h3 className="text-xl font-medium mb-2 text-green-900">Preview:</h3>
-//               <div className="w-full relative h-64 border border-green-300 rounded-lg shadow-sm transition-all duration-300">
-//                 <Image 
-//                   src={preview} 
-//                   alt="Uploaded Preview" 
-//                   fill 
-//                   sizes="(max-width: 768px) 100vw, 800px"
-//                   className="object-cover rounded-lg"
-//                 />
-//               </div>
-//             </div>
-//           )}
-
-//           {/* Submit Button */}
-//           <button
-//             onClick={handleSubmit}
-//             className="w-full bg-green-800 text-white py-3 rounded-lg mt-4 hover:bg-green-900 transition-colors duration-300 transform hover:scale-105 shadow-lg"
-//           >
-//             Diagnose Now
-//           </button>
-
-//           {/* Inference Result */}
-//           {result && (
-//             <div className="mt-8 p-4 bg-green-100 border border-green-300 rounded-lg shadow-sm transition-all duration-300">
-//               <h3 className="text-xl font-medium mb-2 text-green-900">Result:</h3>
-//               <p className="text-green-800">{result}</p>
-//             </div>
-//           )}
-//         </div>
-
-//         {/* Additional Content Section */}
-//         <div className="mt-10 max-w-3xl w-full">
-//           <div className="border-t border-green-300 pt-6">
-//             <h2 className="text-2xl font-bold text-green-900 mb-2">How It Works</h2>
-//             <p className="text-green-800 mb-4">
-//               Our state-of-the-art AI analyzes your plant images to identify potential diseases early.
-//               This allows you to take proactive steps to maintain healthy crops and ensure optimal yield.
-//             </p>
-//             <p className="text-green-800">
-//               Whether you use the drag &amp; drop option or your mobile camera, our system processes your image
-//               with precision and speed, delivering reliable diagnostic results instantly.
-//             </p>
-//           </div>
-//         </div>
-//       </div>
-
-//       <style jsx global>{`
-//         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
-//         body {
-//           font-family: 'Poppins', sans-serif;
-//         }
-//         @keyframes spin-slow {
-//           from {
-//             transform: rotate(0deg);
-//           }
-//           to {
-//             transform: rotate(360deg);
-//           }
-//         }
-//         .animate-spin-slow {
-//           animation: spin-slow 4s linear infinite;
-//         }
-//         /* Animated background gradient with subtle royal green accents */
-//         .bg-animated-gradient {
-//           background: linear-gradient(270deg, #F0FDF4, #F0FDF4, #F0FDF4);
-//           background-size: 600% 600%;
-//           animation: gradientShift 10s ease infinite;
-//         }
-//         @keyframes gradientShift {
-//           0% {
-//             background-position: 0% 50%;
-//           }
-//           50% {
-//             background-position: 100% 50%;
-//           }
-//           100% {
-//             background-position: 0% 50%;
-//           }
-//         }
-//       `}</style>
-//     </>
-//   );
-// }
-
-
-// 'use client';
-
-// import { useState } from 'react';
-// import { useDropzone } from 'react-dropzone';
-// import Link from 'next/link';
-// import Image from 'next/image';
-// import {
-//   FiArrowLeft,
-//   FiCamera,
-//   FiUpload,
-// } from 'react-icons/fi';
-// import { FaLeaf } from 'react-icons/fa';
-// import Script from 'next/script';
-
-// export default function Upload() {
-//   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-//   const [preview, setPreview] = useState<string | null>(null);
-//   const [result, setResult] = useState<string>('');
-//   const [loading, setLoading] = useState<boolean>(false);
-
-//   // Handle drag-and-drop
-//   const onDrop = (acceptedFiles: File[]) => {
-//     const file = acceptedFiles[0];
-//     setSelectedFile(file);
-//     setPreview(URL.createObjectURL(file));
-//   };
-
-//   const accept: { [mime: string]: string[] } = { 'image/*': [] };
-//   const { getRootProps, getInputProps } = useDropzone({
-//     onDrop,
-//     accept,
-//   });
-
-//   // Handle camera capture
-//   const handleCameraCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
-//     if (event.target.files && event.target.files[0]) {
-//       const file = event.target.files[0];
-//       setSelectedFile(file);
-//       setPreview(URL.createObjectURL(file));
-//     }
-//   };
-
-//   // Submit image for inference (Connects to the backend API)
-//   const handleSubmit = async () => {
-//     if (!selectedFile) {
-//       alert('Please upload an image first.');
-//       return;
-//     }
-
-//     setLoading(true);
-//     const formData = new FormData();
-//     formData.append('file', selectedFile);
-
-//     try {
-//       const res = await fetch('https://adityaanand-phytosense.hf.space/predict', {
-//         method: 'POST',
-//         body: formData,
-//       });
-
-//       const data = await res.json();
-//       setResult(data.prediction.class + " (Confidence: " + (data.prediction.confidence * 100).toFixed(2) + "%)");
-//     } catch (error) {
-//       console.error('Error during inference:', error);
-//       setResult("Error processing the image.");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <>
-//       <div className="min-h-screen bg-green-50 flex flex-col items-center py-10 px-4">
-//         {/* Back to Home Link */}
-//         <Link
-//           href="/"
-//           className="flex items-center text-green-800 hover:text-green-900 self-start mb-4 transition-colors duration-300"
-//         >
-//           <FiArrowLeft className="mr-1" /> Back to Home
-//         </Link>
-
-//         {/* Main Card - hover scaling only on md and above */}
-//         <div className="bg-white rounded-lg shadow-xl p-10 max-w-3xl w-full transition-transform duration-500 ease-in-out md:hover:scale-105">
-//           {/* Header with Plant Icon and Tagline */}
-//           <div className="flex flex-col items-center mb-6">
-//             <FaLeaf className="text-green-800 animate-pulse" size={52} />
-//             <h1 className="text-3xl font-bold text-green-900 mt-2">
-//               Upload Your Plant Image
-//             </h1>
-//             <p className="text-green-700 italic mt-1">
-//               Diagnose plant diseases at the speed of light.
-//             </p>
-//           </div>
-
-//           <hr className="border-green-300 mb-6" />
-
-//           {/* Drag & Drop Section */}
-//           <div className="mb-8">
-//             <div
-//               {...getRootProps()}
-//               className="border-2 border-dashed border-green-800 rounded-lg p-8 flex flex-col items-center justify-center cursor-pointer hover:border-green-900 transition-all duration-300"
-//             >
-//               <input {...getInputProps()} />
-//               <FiUpload size={56} className="text-green-800 mb-2 animate-bounce" />
-//               <p className="text-green-900 font-medium text-lg">
-//                 Drag &amp; drop your image here or click to select one
-//               </p>
-//             </div>
-//           </div>
-
-//           {/* Camera Capture Button */}
-//           <div className="mb-8 flex justify-center">
-//             <div className="flex flex-col items-center">
-//               <label
-//                 htmlFor="cameraInput"
-//                 className="bg-green-800 text-white px-6 py-3 rounded-lg hover:bg-green-900 cursor-pointer transition-transform duration-300 ease-in-out hover:scale-110 flex items-center shadow-xl"
-//               >
-//                 <FiCamera size={22} className="mr-3" />
-//                 <span className="font-semibold">Capture &amp; Diagnose</span>
-//               </label>
-//               <input
-//                 id="cameraInput"
-//                 type="file"
-//                 accept="image/*"
-//                 capture="environment"
-//                 onChange={handleCameraCapture}
-//                 className="hidden"
-//               />
-//             </div>
-//           </div>
-
-//           {/* Preview Section */}
-//           {preview && (
-//             <div className="mb-8 transition-opacity duration-500 ease-in-out">
-//               <h3 className="text-xl font-medium mb-2 text-green-900">Preview:</h3>
-//               <div className="w-full relative h-64 border border-green-300 rounded-lg shadow-sm transition-all duration-300">
-//                 <Image 
-//                   src={preview} 
-//                   alt="Uploaded Preview" 
-//                   fill 
-//                   sizes="(max-width: 768px) 100vw, 800px"
-//                   className="object-cover rounded-lg"
-//                 />
-//               </div>
-//             </div>
-//           )}
-
-//           {/* Submit Button */}
-//           <button
-//             onClick={handleSubmit}
-//             className="w-full bg-green-800 text-white py-3 rounded-lg mt-4 hover:bg-green-900 transition-colors duration-300 transform hover:scale-105 shadow-lg"
-//             disabled={loading}
-//           >
-//             {loading ? "Processing..." : "Diagnose Now"}
-//           </button>
-
-//           {/* Inference Result */}
-//           {result && (
-//             <div className="mt-8 p-4 bg-green-100 border border-green-300 rounded-lg shadow-sm transition-all duration-300">
-//               <h3 className="text-xl font-medium mb-2 text-green-900">Result:</h3>
-//               <p className="text-green-800">{result}</p>
-//             </div>
-//           )}
-//         </div>
-//       </div>
-
-//       {/* Embed Gradio Interface at the bottom */}
-//       <Script
-//         type="module"
-//         src="https://gradio.s3-us-west-2.amazonaws.com/5.23.1/gradio.js"
-//       />
-//       <iframe
-//         src="https://adityaanand-phytosense.hf.space"
-//         frameBorder="0"
-//         width="850"
-//         height="450"
-//         style={{ margin: "2rem auto", display: "block" }}
-//       ></iframe>
-
-//       <style jsx global>{`
-//         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
-//         body {
-//           font-family: 'Poppins', sans-serif;
-//         }
-//       `}</style>
-//     </>
-//   );
-// }
-
+            {generatedInfo && <DiseaseInfo content={generatedInfo} />}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
