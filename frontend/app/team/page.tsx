@@ -29,7 +29,7 @@ const skillStyles = [
 const teamMembers = [
   {
     name: 'Sneha Dwivedi',
-    image: 'https://i.ibb.co/wFB0nxmF/snehaa.jpg',
+    image: 'https://i.ibb.co/4wMSJbcJ/litchu.png', 
     about: 'BACKEND DEV & ML ENGINEER',
     skills: ['PYTHON', 'FLASK', 'AI/ML', 'HUGGING FACE', 'FIREBASE', 'API'],
     contribution: 'Developed the entire Backend while Researching & contributing to multiple Model Training.',
