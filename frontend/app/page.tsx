@@ -18,6 +18,7 @@ import {
 import { FaLeaf, FaSeedling } from 'react-icons/fa';
 import { FaBoxesStacked } from 'react-icons/fa6';
 import ScrollIndicator from './components/ScrollIndicator';
+import LinkedinHead from './components/LinkedinHead';
 
 export default function Home() {
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -273,7 +274,8 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-slate-900 text-white">
       <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12"> {/* Initially grid-cols-4 was there I changed to add linkedin header to 5 */}
+        {/* <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-12"> */}
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-6">
@@ -336,7 +338,19 @@ export default function Home() {
               </div>
             </div>
           </div>
+
+          {/* Linkedin Head */}
+          <div className="space-y-4">
+            <h4 className="text-emerald-400 font-medium mb-4">{/* Put the label sth like Connect on linkedin or etc. */}</h4>
+            <div className="space-y-3 text-sm">
+              {/* <LinkedinHead /> */}
+            </div>
+          </div>
+          
+          
         </div>
+
+        
 
         <div className="border-t border-slate-800 pt-8 text-center">
           <p className="text-slate-400 text-sm">
