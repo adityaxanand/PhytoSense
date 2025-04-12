@@ -18,7 +18,7 @@ import {
 import { FaLeaf, FaSeedling } from 'react-icons/fa';
 import { FaBoxesStacked } from 'react-icons/fa6';
 import ScrollIndicator from './components/ScrollIndicator';
-import LinkedinHead from './components/LinkedinHead';
+// import LinkedinHead from './components/LinkedinHead';
 
 export default function Home() {
   const [scrollProgress, setScrollProgress] = useState(0);
